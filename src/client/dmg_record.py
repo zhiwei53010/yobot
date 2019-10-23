@@ -18,8 +18,15 @@ class Record():
     """
 
     Boss_health = {
-        "jp": [6000000, 8000000, 10000000, 12000000, 15000000],
-        "tw": [6000000, 8000000, 10000000, 12000000, 20000000]}
+        "jp": [
+            [6000000, 8000000, 10000000, 12000000, 15000000],
+            [6000000, 8000000, 10000000, 12000000, 15000000],
+            [7000000, 9000000, 12000000, 14000000, 17000000]
+        ],
+        "tw": [
+            [6000000, 8000000, 10000000, 12000000, 20000000]
+        ]*3
+    }
     txt_list = []
 
     def __init__(self, baseinfo):
@@ -65,13 +72,21 @@ class Record():
                 f.seek(0)
                 f.truncate()
                 json.dump(mailcfg, f, ensure_ascii=False, indent=2)
-            self.txt_list.append("本群第一次使用，数据已初始化，请仔细阅读说明yobot.xyz")
+            self.txt_list.append("本群第一次使用，数据已初始化，请仔细阅读说明h.yobot.monster")
         else:
             with open(os.path.join(self.__path, "data", self.__groupid+".dat"), "rb") as f:
                 self.__data = pickle.load(f)
 
     def __del__(self):
         pass
+
+    def __lap2stage(self, lap):
+        if lap <= 3:
+            return 0
+        elif lap <= 10:
+            return 1
+        else:
+            return 2
 
     def _boss_status(self):
         self.txt_list.append("现在{}周目，{}号boss，剩余血量{:,}".format(
@@ -131,10 +146,10 @@ class Record():
                     cmd,
                     self.__comment))
 
-    def __damage(self, cmd, comment = None):
+    def __damage(self, cmd, comment=None):
         dmg = self._cmdtoint(cmd)
         if dmg == None:
-            return        
+            return
         remain = self.__conf[self.__groupid]["remain"]
         if(dmg >= remain):
             self.__comment += "未记录"
@@ -179,7 +194,7 @@ class Record():
             self.__comment += "已记录"
             self._boss_status()
 
-    def __eliminate(self, comment = None):
+    def __eliminate(self, comment=None):
         if not (self.__qqid in self.__data[1].keys()):
             self.__creat_mem()
             if self.__qqid == "unknown":
@@ -220,9 +235,10 @@ class Record():
         else:
             self.__conf[self.__groupid]["boss"] = \
                 self.__conf[self.__groupid]["boss"]+1
-        self.__conf[self.__groupid]["remain"] = \
-            self.Boss_health[self.__conf[self.__groupid]["area"]
-                             ][self.__conf[self.__groupid]["boss"]-1]
+        self.__conf[self.__groupid]["remain"] = (
+            self.Boss_health[self.__conf[self.__groupid]["area"]]
+            [self.__lap2stage(self.__conf[self.__groupid]["lap"])]
+            [self.__conf[self.__groupid]["boss"]-1])
         self.__save()
         self.__comment += "已记录"
         self._boss_status()
@@ -241,10 +257,10 @@ class Record():
                     self.__conf[self.__groupid]["boss"] = opt[4]
                     self.__conf[self.__groupid]["remain"] = opt[5]
                 if (opt[6] == 2 or opt[6] == 3):  # 余刀
-                    self.__data[1][self.__qqid][1] = 2  # 上一刀为尾刀
+                    self.__data[1][opt[2]][1] = 2  # 上一刀为尾刀
                 else:  # 非余刀
-                    self.__data[1][self.__qqid][1] = 0  # 上一刀非尾刀
-                    self.__data[1][self.__qqid][3] -= 1  # 本日刀数-1
+                    self.__data[1][opt[2]][1] = 0  # 上一刀非尾刀
+                    self.__data[1][opt[2]][3] -= 1  # 本日刀数-1
                 self.__save()
                 self.__comment += "已撤销"
                 self.txt_list.append("{}在{}对{}周目{}号boss造成的{:,}伤害已撤销".format(
@@ -273,7 +289,9 @@ class Record():
         else:
             b = self._cmdtoint(match.group(2))
             if match.group(1) in ["血量", "生命", "生命值", "体力"]:
-                if b >= 1 and b <= self.Boss_health[self.__conf[self.__groupid]["area"]][self.__conf[self.__groupid]["boss"]-1]:
+                if b >= 1 and b <= (self.Boss_health[self.__conf[self.__groupid]["area"]]
+                                    [self.__lap2stage(self.__conf[self.__groupid]["lap"])]
+                                    [self.__conf[self.__groupid]["boss"]-1]):
                     self.__data[0].append([
                         False,
                         int(time.time()),
@@ -299,9 +317,10 @@ class Record():
                         self.__conf[self.__groupid]["boss"],
                         self.__conf[self.__groupid]["remain"]])
                     self.__conf[self.__groupid]["boss"] = b
-                    self.__conf[self.__groupid]["remain"] = \
-                        self.Boss_health[self.__conf[self.__groupid]
-                                         ["area"]][b-1]
+                    self.__conf[self.__groupid]["remain"] = (
+                        self.Boss_health[self.__conf[self.__groupid]["area"]]
+                        [self.__lap2stage(self.__conf[self.__groupid]["lap"])]
+                        [b-1])
                     self.__save()
                     self.__comment += "已修正"
                     self.txt_list.append("boss状态已更新")
@@ -438,6 +457,8 @@ class Record():
             return 8
         elif cmd == "选择台服" or cmd == "切换台服":
             return 9
+        elif cmd == "选择国服" or cmd == "切换国服":
+            return 91
         elif cmd.startswith("重新开始"):
             return 10
         elif cmd.startswith("订阅邮件") or cmd.startswith("增加邮箱") or cmd.startswith("添加邮箱"):
@@ -469,19 +490,19 @@ class Record():
         if not os.path.exists(os.path.join(self.__path, "data", self.__groupid+".dat")):
             if cmd == "选择日服":
                 self.__conf[self.__groupid]["area"] = "jp"
-                self.__conf[self.__groupid]["remain"] = self.Boss_health["jp"][0]
+                self.__conf[self.__groupid]["remain"] = self.Boss_health["jp"][0][0]
                 self.__save()
                 self._boss_status()
                 self.__comment += "已成功选择"
-            elif cmd == "选择台服":
+            elif cmd == "选择台服" or cmd == "选择国服":
                 self.__conf[self.__groupid]["area"] = "tw"
-                self.__conf[self.__groupid]["remain"] = self.Boss_health["tw"][0]
+                self.__conf[self.__groupid]["remain"] = self.Boss_health["tw"][0][0]
                 self.__save()
                 self._boss_status()
                 self.__comment += "已成功选择"
             else:
                 self.txt_list.append(
-                    "由于日服、台服boss血量不同、每日重置时间不同，请发送“#选择日服”或“#选择台服”")
+                    "由于日服、台服、国服boss血量不同、每日重置时间不同，请发送“#选择日服”或“#选择台服”或“#选择国服”")
                 self.__comment += "未选择"
         elif func_num == 2:
             self.__damage(cmd, comment)
@@ -515,10 +536,11 @@ class Record():
             self.__save()
             self.txt_list.append("已切换为日服")
             self.__comment += "已切换"
-        elif func_num == 9:
+        elif func_num == 9 or func_num == 91:
             self.__conf[self.__groupid]["area"] = "tw"
             self.__save()
-            self.txt_list.append("已切换为台服")
+            self.txt_list.append(
+                "已切换为台服" if func_num == 9 else "已切换为国服")
             self.__comment += "已切换"
         elif func_num == 10:
             self.__show_status = False

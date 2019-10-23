@@ -239,7 +239,7 @@ class Report():
                                           "report",
                                           self.rpt_name,
                                           self.rpt_name+".zip"),
-                             compression=ZIP_DEFLATED,
+                             compression=zipfile.ZIP_DEFLATED,
                              mode="w",
                              compresslevel=9) as z:
             z.write(os.path.join(self.__path, "data", self.__groupid+".log"),
@@ -291,14 +291,20 @@ class Report():
         except smtplib.SMTPServerDisconnected:
             self.txt_list.append("SMTP连接失败，请检查您与" +
                                  mailconfig["sender"]["host"] + "的连接")
+            return
         except smtplib.SMTPAuthenticationError:
             self.txt_list.append(
-                r"发件邮箱密码错误，请修改“yobot_dep\dmg_report\mailconf.json”中的发件邮箱")
+                r"发件邮箱密码错误，请发送“#设置邮箱”输入正确密码")
+            return
         except smtplib.SMTPSenderRefused:
             self.txt_list.append(
-                r"发件邮箱已被服务商禁用，请修改“yobot_dep\dmg_report\mailconf.json”中的发件邮箱")
-        finally:
-            smtp_obj.quit()
+                r"发件邮箱已被服务商禁用，请发送“#设置邮箱”输入新的邮箱")
+            return
+        except Exception as other:
+            self.txt_list.append("未知错误：")
+            self.txt_list.append(str(other))
+            return
+        smtp_obj.quit()
         self.txt_list.append("报告已发送至：")
         for addr in receivers[:-1]:  # 不显示最后一个
             self.txt_list.append(addr)

@@ -34,6 +34,13 @@ class Check():
         if ver["checktime"] == 1:  # 已经发现新版本
             f.close()
             return "有新的版本可用，发送“#更新”唤起更新程序"
+        if ver["checktime"] == 2:  # 刚刚更新
+            ver["checktime"] = 0
+            f.seek(0)
+            f.truncate()
+            json.dump(ver, f, indent=2, ensure_ascii=False)
+            f.close()
+            return ver["new-feature"]
         elif ver["checktime"] < now:  # 到检查时间
             response = requests.get(ver["url"])
             if response.status_code != 200:  # 网页返回错误

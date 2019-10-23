@@ -99,7 +99,7 @@ def yobot(*cmd_list):
             report = Record(cmd_list[:3])
             report.rep(cmd, func)
             txt_list.extend(report.txt_list)
-            if func == 3 or func == 4:
+            if func == 3 or func == 400 or func == 401:
                 pass  # 后面可能继续运行
             else:
                 return txt_list  # 后面不再运行
