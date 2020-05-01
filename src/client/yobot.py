@@ -197,20 +197,20 @@ class Yobot:
 
         # load plugins
         plug_all = [
-            updater.Updater(**kwargs),
-            switcher.Switcher(**kwargs),
+            # updater.Updater(**kwargs),
+            # switcher.Switcher(**kwargs),
             yobot_msg.Message(**kwargs),
-            gacha.Gacha(**kwargs),
-            jjc_consult.Consult(**kwargs),
-            boss_dmg.Boss_dmg(**kwargs),
-            push_news.News(**kwargs),
-            calender.Event(**kwargs),
-            homepage.Index(**kwargs),
-            marionette.Marionette(**kwargs),
-            login.Login(**kwargs),
-            settings.Setting(**kwargs),
+            gacha.Gacha(**kwargs), # 简易抽卡
+            # jjc_consult.Consult(**kwargs),
+            # boss_dmg.Boss_dmg(**kwargs),
+            # push_news.News(**kwargs),
+            # calender.Event(**kwargs),
+            homepage.Index(**kwargs), # 这里有一些基本的网页
+            # marionette.Marionette(**kwargs),
+            login.Login(**kwargs), # 登录模块
+            # settings.Setting(**kwargs),
             web_util.WebUtil(**kwargs),
-            clan_battle.ClanBattle(**kwargs),
+            clan_battle.ClanBattle(**kwargs), # 公会战模块
         ]
         self.plug_passive = [p for p in plug_all if p.Passive]
         self.plug_active = [p for p in plug_all if p.Active]
@@ -225,7 +225,10 @@ class Yobot:
         ]
 
     def active_jobs(self) -> List[Tuple[Any, Callable[[], Iterable[Dict[str, Any]]]]]:
+        if len(self.plug_active) <= 0:
+            return None
         jobs = [p.jobs() for p in self.plug_active]
+
         return reduce(lambda x, y: x+y, jobs)
 
     async def proc_async(self, msg: dict, *args, **kwargs) -> str:
