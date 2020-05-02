@@ -84,7 +84,7 @@ class Login:
                 login_code,
             )
         )
-        reply = newurl+'#\n请在一分钟内点击'
+        reply = newurl # +'#\n请在一分钟内点击'
         # if self.setting['web_mode_hint']:
         #     reply += '\n\n如果连接无法打开，请仔细阅读教程中《链接无法打开》的说明'
 

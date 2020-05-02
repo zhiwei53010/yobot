@@ -1253,7 +1253,7 @@ class ClanBattle:
                     group_id
                 )
             )
-            return f'公会战面板：\n{url}\n建议添加到浏览器收藏夹或桌面快捷方式'
+            return f'{url}'
         elif match_num == 16:  # SL
             if len(cmd) != 2:
                 return
