@@ -185,8 +185,8 @@ class Gacha:
             self.setting['public_address'],
             '{}output/{}/{}'.format(
                 self.setting['public_basepath'], num, filename))
-        if self.setting['web_mode_hint']:
-            reply += '\n\n如果连接无法打开，请仔细阅读教程中《链接无法打开》的说明'
+        # if self.setting['web_mode_hint']:
+        #     reply += '\n\n如果连接无法打开，请仔细阅读教程中《链接无法打开》的说明'
         return reply
 
     def check_ver(self) -> None:
