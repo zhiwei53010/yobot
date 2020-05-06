@@ -74,7 +74,7 @@ def main():
 
     @cqbot.on_message
     async def handle_msg(context):
-        if context["message_type"] == "group": # or context["message_type"] == "private":
+        if context["message_type"] == "group" or context["message_type"] == "private":
             reply = await bot.proc_async(context)
         else:
             reply = None

@@ -64,7 +64,7 @@ class Yobot:
             default_config_f_path = os.path.join(
                 os.path.dirname(__file__), "default_config.json")
         with open(default_config_f_path, "r", encoding="utf-8") as config_file:
-            self.glo_setting = json.load(config_file)
+            self.veglo_setting = json.load(config_file)
         if not os.path.exists(config_f_path):
             shutil.copyfile(default_config_f_path, config_f_path)
             print("设置已初始化，发送help获取帮助")
@@ -208,7 +208,7 @@ class Yobot:
             homepage.Index(**kwargs), # 这里有一些基本的网页
             # marionette.Marionette(**kwargs),
             login.Login(**kwargs), # 登录模块
-            # settings.Setting(**kwargs),
+            settings.Setting(**kwargs),
             web_util.WebUtil(**kwargs),
             clan_battle.ClanBattle(**kwargs), # 公会战模块
         ]
